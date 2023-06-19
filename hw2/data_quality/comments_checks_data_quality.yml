@@ -1,0 +1,21 @@
+checks for comments:
+  # Корректная схема данных
+  - schema:
+      name: Find missing columns or wrong type of columns
+      fail:
+        when required column missing: [ video_id, comment_text, likes, replies ]
+        when wrong column type:
+          video_id: string
+          comment_text: string
+          likes: integer
+          replies: integer
+  # Корректные идентификаторы видео (по содержанию спецсимволов и длине)
+  - invalid_count(video_id) = 0:
+      valid regex: ^[a-zA-Z0-9_-]{11}$
+  # Корректные значения в полях likes и replies: все значения >= 0 и есть хотя бы одно значение > 0
+  - invalid_count(likes) = 0:
+      valid min: 0
+  - invalid_count(replies) = 0:
+      valid min: 0
+  - max(likes) > 0
+  - max(replies) > 0
