@@ -1,6 +1,15 @@
-from soda.scan import Scan
+import pytest
+from pyspark.sql import SparkSession
 from pyspark.sql.types import StructField, StructType, StringType, IntegerType
+from soda.scan import Scan
 
+
+@pytest.fixture(scope='session')
+def spark():
+    return SparkSession.builder \
+      .master("local") \
+      .appName("Spoetry installparkAppTests") \
+      .getOrCreate()
 
 def build_scan(name, spark_session):
     scan = Scan()

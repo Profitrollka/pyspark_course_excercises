@@ -1,4 +1,16 @@
+import pytest
+from pyspark.sql import SparkSession
+from pyspark.sql.types import ArrayType, StringType
+from pyspark.sql.functions import udf
 from video_analytics.functions import split_tags
+
+
+@pytest.fixture(scope='session')
+def spark():
+    return SparkSession.builder \
+      .master("local") \
+      .appName("SparkAppTests") \
+      .getOrCreate()
 
 def test_split_tags_with_tags(spark):
     # Подготовка данных
@@ -6,7 +18,8 @@ def test_split_tags_with_tags(spark):
     source_df = spark.createDataFrame([(source_data,)], ["tags"])
 
     # Применение UDF
-    actual_df = source_df.withColumn("split_tags", split_tags(source_df.tags))
+    split_tags_udf = udf(split_tags, ArrayType(StringType()))
+    actual_df = source_df.withColumn("split_tags", split_tags_udf(source_df.tags))
 
     # Проверка результатов
     expected_result = ["tag1", "tag2", "tag3"]
@@ -20,7 +33,8 @@ def test_split_tags_with_empty_tags(spark):
     source_df = spark.createDataFrame([(source_data,)], ["tags"])
 
     # Применение UDF
-    actual_df = source_df.withColumn("split_tags", split_tags(source_df.tags))
+    split_tags_udf = udf(split_tags, ArrayType(StringType()))
+    actual_df = source_df.withColumn("split_tags", split_tags_udf(source_df.tags))
 
     # Проверка результатов
     expected_result = []
@@ -34,7 +48,8 @@ def test_split_tags_with_single_tag(spark):
     source_df = spark.createDataFrame([(source_data,)], ["tags"])
 
     # Применение UDF
-    actual_df = source_df.withColumn("split_tags", split_tags(source_df.tags))
+    split_tags_udf = udf(split_tags, ArrayType(StringType()))
+    actual_df = source_df.withColumn("split_tags", split_tags_udf(source_df.tags))
 
     # Проверка результатов
     expected_result = ["tag1"]
@@ -48,7 +63,8 @@ def test_split_tags_with_special_characters(spark):
     source_df = spark.createDataFrame([(source_data,)], ["tags"])
 
     # Применение UDF
-    actual_df = source_df.withColumn("split_tags", split_tags(source_df.tags))
+    split_tags_udf = udf(split_tags, ArrayType(StringType()))
+    actual_df = source_df.withColumn("split_tags", split_tags_udf(source_df.tags))
 
     # Проверка результатов
     expected_result = ["tag1", "tag3##tag4$tag5:", "tag3"]
